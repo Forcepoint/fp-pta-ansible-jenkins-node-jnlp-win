@@ -8,17 +8,17 @@
   register: openjdk
 
 - name: reboot
+  # A reboot is immediately required if openjdk changed so JAVA_HOME is available.
   win_reboot:
   when: openjdk.changed
-# A reboot is immediately required if openjdk changed so JAVA_HOME is available.
 
 - name: apply the provided cert
   block:
     - name: check the java keystore for the cert
       win_shell: "bin\\keytool -list -storepass changeit -alias {{ jenkins_node_master_ca_cert | basename }} -keystore lib\\security\\cacerts"
-        args:
-          executable: cmd
-          chdir: "%JAVA_HOME%"
+      args:
+        executable: cmd
+        chdir: "%JAVA_HOME%"
       ignore_errors: yes
       register: check_java_keystore
 
