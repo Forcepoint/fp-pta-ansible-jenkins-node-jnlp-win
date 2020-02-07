@@ -62,7 +62,7 @@
 - name: add the node config to the jenkins master
   # To run this script, the user provided has to have Administrator rights in the Jenkins instance because it runs the Script Console.
   # See https://support.cloudbees.com/hc/en-us/articles/222520647-How-to-find-slave-secret-key-
-  win_shell: python {{ jenkins_node_path }}/create_jenkins_node_jnlp.py "{{ jenkins_node_master_url }}" "{{ jenkins_node_master_user }}" "{{ jenkins_node_master_password }}" "{{ jenkins_node_name }}" "{{ jenkins_node_description }}" "{{ jenkins_node_labels }}" "{{ jenkins_node_path }}\\node_secret.txt" "--num-executors={{ jenkins_node_executors }}" "--path={{ jenkins_node_path }}"
+  win_shell: python {{ jenkins_node_path }}/create_jenkins_node_jnlp.py "{{ jenkins_node_master_url }}" "{{ jenkins_node_master_user }}" "{{ jenkins_node_master_password }}" "{{ jenkins_node_name }}" "{{ jenkins_node_description }}" "{{ jenkins_node_labels }}" "{{ jenkins_node_path }}\\node_secret.txt" "--num-executors={{ jenkins_node_executors }}" "--path={{ jenkins_node_path }}" --verbose
   # As of 2017-10-2, Ansible doesn't keep track what values were vaulted. Without no_log, an error would
   # cause the command to be displayed, which is not desirable.
   # 2019-12-02: You have two options. Use 'no_log: yes' or use a Jenkins credential object so Jenkins masks the output. I have opted for Jenkins to mask the output
