@@ -92,7 +92,7 @@
   delegate_to: localhost
 
 - name: create a scheduled task to start the connection to the master
-  # Create a Scheduled Task that runs on startup, which runs agent.cmd in the directory C:\Jenkins\.
+  # Create a Scheduled Task that runs on boot, which runs agent.cmd.
   win_scheduled_task:
     name: Jenkins JNLP
     description: start the JNLP connectio to the Jenkins master
