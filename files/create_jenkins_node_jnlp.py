@@ -118,7 +118,8 @@ if __name__ == "__main__":
         set_element_text(tree_node_config, "label", args.labels)
 
         # Double check that the changes were made.
-        str_xml_node_config_mod = ElementTree.tostring(tree_node_config)
+        # For whatever reason the tostring function returns a binary string.
+        str_xml_node_config_mod = ElementTree.tostring(tree_node_config).decode('ascii')
         if args.verbose:
             print("AFTER MOD")
             print("----------")
