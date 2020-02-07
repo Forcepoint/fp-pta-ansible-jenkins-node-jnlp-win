@@ -26,7 +26,9 @@ The Jenkins master is running OpenJDK 11 or higher.
 * jenkins_node_master_url: The URL to the Jenkins master this node will connect with.
 * jenkins_node_master_user: A user on the Jenkins master that has enough permissions to add a node.
 * jenkins_node_master_password: The password for the user on the Jenkins master. This should be vaulted.
-* jenkins_node_user_name: The user name on Windows for creating JNLP connection with.
+* jenkins_node_user_name: The user name on Windows for creating JNLP connection with. 
+  **This must be the same user the ansible connection is made with to your Windows machine.
+  The user must already exist.**
 * jenkins_node_user_password: The password for the user on Windows for creating the JNLP connection with.
 
 Make sure you get those passwords vaulted so they're not in plain text!
