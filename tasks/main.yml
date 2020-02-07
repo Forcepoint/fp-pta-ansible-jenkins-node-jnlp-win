@@ -1,0 +1,116 @@
+---
+# tasks file for win-jenkins-node-jnlp
+
+- name: install openjdk11
+  win_chocolatey:
+    name: openjdk11
+    state: latest
+  register: openjdk
+
+- name: reboot
+  win_reboot:
+  when: openjdk.changed
+# A reboot is immediately required if openjdk changed so JAVA_HOME is available.
+
+- name: install the cert in the java store
+  win_shell: "bin\\keytool -import -storepass changeit -noprompt -trustcacerts -alias CAInternalFDO -file C:\\Windows\\fdo_ca.pem -keystore lib\\security\\cacerts"
+  args:
+    executable: cmd
+    chdir: "%JAVA_HOME%"
+  when: jenkins_node_master_ca_cert is defined
+
+- name: create folder for workspaces
+  win_file:
+    path: "{{ jenkins_node_path }}"
+    state: directory
+
+- name: download the agent jar
+  win_get_url:
+    url: https://slcjenkins.us.fdo/jnlpJars/agent.jar
+    dest: "{{ jenkins_node_path }}\\agent.jar"
+    force: yes
+  register: result_download_agent_jar
+
+- name: install python-jenkins
+  pip:
+    name: python-jenkins
+    state: latest
+
+- name: copy node creation script
+  copy:
+    src: files/create_jenkins_node_jnlp.py
+    dest: "{{ jenkins_node_path }}/create_jenkins_node_jnlp.py"
+
+- name: copy modify certifi script
+  copy:
+    src: files/modify_certifi.py
+    dest: "{{ jenkins_node_path }}/modify_certifi.py"
+
+- name: modify certifi if needed
+  command: python {{ jenkins_node_path }}/modify_certifi.py "{{ jenkins_node_master_url }}" "{{ jenkins_node_master_ca_cert }}"
+
+- name: add the node config to the jenkins master
+  # To run this script, the user provided has to have Administrator rights in the Jenkins instance because it runs the Script Console.
+  # See https://support.cloudbees.com/hc/en-us/articles/222520647-How-to-find-slave-secret-key-
+  command: python {{ jenkins_node_path }}/create_jenkins_node_jnlp.py "{{ jenkins_node_master_url }}" "{{ jenkins_node_master_user }}" "{{ jenkins_node_master_password }}" "{{ jenkins_node_name }}" "{{ jenkins_node_description }}" "{{ jenkins_node_labels }}" "{{ jenkins_node_path }}/node_secret.txt" "--num-executors={{ jenkins_node_executors }}" "--path={{ jenkins_node_path }}"
+  # As of 2017-10-2, Ansible doesn't keep track what values were vaulted. Without no_log, an error would
+  # cause the command to be displayed, which is not desirable.
+  # 2019-12-02: You have two options. Use 'no_log: yes' or use a Jenkins credential object so Jenkins masks the output. I have opted for Jenkins to mask the output
+  # as this is a command that fails often, and I'm tired of having to run the command by hand and removing no_log so I can see the output.
+
+- name: fetch the node secret from the remote
+  fetch:
+    src: "{{ jenkins_node_path }}/node_secret.txt"
+    dest: /tmp/fetch-{{ inventory_hostname }}/
+    flat: yes
+
+- name: get the node secret
+  set_fact:
+    jenkins_node_secret: "{{ lookup('file', '/tmp/fetch-{{ inventory_hostname }}/node_secret.txt').strip() }}"
+  no_log: yes
+
+- name: copy agent script
+  template:
+    src: agent.cmd
+    dest: "{{ jenkins_node_path }}\\agent.cmd"
+  register: result_copy_agent_script
+
+- name: remove the node secret from localhost
+  file:
+    state: absent
+    path: /tmp/fetch-{{ inventory_hostname }}/node_secret.txt
+  delegate_to: localhost
+
+- name: create a scheduled task to start the connection to the master
+  # Create a Scheduled Task that runs on startup, which runs agent.cmd in the directory C:\Jenkins\.
+  win_scheduled_task:
+    name: Jenkins JNLP
+    description: start the JNLP connectio to the Jenkins master
+    actions:
+    - path: cmd.exe
+      arguments: /c agent.cmd
+      working_directory: "{{ jenkins_node_path }}"
+    triggers:
+    - type: boot
+    username: "{{ jenkins_node_user_name }}"
+    password: "{{ jenkins_node_user_password }}"
+    update_password: no
+    logon_type: password
+    run_level: highest
+    run_only_if_network_available: yes
+    enabled: yes
+  register: result_scheduled_task
+
+# Restart if any of the above pertinent tasks changed.
+- win_reboot:
+  when: result_copy_agent_script.changed or result_download_agent_jar.changed or result_scheduled_task.changed
+
+- name: copy node verify script
+  copy:
+    src: verify_jenkins_node_jnlp.py
+    dest: "{{ jenkins_node_path }}/verify_jenkins_node_jnlp.py"
+
+- name: verify that the node is connected
+  command: python {{ jenkins_node_path }}/verify_jenkins_node_jnlp.py "{{ jenkins_node_master_url }}" "{{ jenkins_node_master_user }}" "{{ jenkins_node_master_password }}" "{{ jenkins_node_name }}"
+  # 2019-12-02: You have two options. Use 'no_log: yes' or use a Jenkins credential object so Jenkins masks the output. I have opted for Jenkins to mask the output
+  # as this is a command that fails often, and I'm tired of having to run the command by hand and removing no_log so I can see the output.

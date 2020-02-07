@@ -1,0 +1,9 @@
+---
+# defaults file for win-jenkins-node-jnlp
+
+jenkins_node_name: "{{ inventory_hostname }}"
+jenkins_node_description: ""
+jenkins_node_executors: 1
+jenkins_node_labels: "{{ inventory_hostname }}"
+jenkins_node_path: 'C:\Jenkins'
+jenkins_node_master_ca_cert: ""
