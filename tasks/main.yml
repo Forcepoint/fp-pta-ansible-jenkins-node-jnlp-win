@@ -47,17 +47,17 @@
   win_shell: pip install --upgrade python-jenkins
 
 - name: copy node creation script
-  copy:
+  win_copy:
     src: files/create_jenkins_node_jnlp.py
-    dest: "{{ jenkins_node_path }}/create_jenkins_node_jnlp.py"
+    dest: "{{ jenkins_node_path }}\\create_jenkins_node_jnlp.py"
 
 - name: copy modify certifi script
-  copy:
+  win_copy:
     src: files/modify_certifi.py
-    dest: "{{ jenkins_node_path }}/modify_certifi.py"
+    dest: "{{ jenkins_node_path }}\\modify_certifi.py"
 
 - name: modify certifi if needed
-  win_shell: python {{ jenkins_node_path }}/modify_certifi.py "{{ jenkins_node_master_url }}" "{{ jenkins_node_master_ca_cert }}"
+  win_shell: python {{ jenkins_node_path }}\\modify_certifi.py "{{ jenkins_node_master_url }}" "{{ jenkins_node_master_ca_cert }}"
 
 - name: add the node config to the jenkins master
   # To run this script, the user provided has to have Administrator rights in the Jenkins instance because it runs the Script Console.
@@ -70,7 +70,7 @@
 
 - name: fetch the node secret from the remote
   fetch:
-    src: "{{ jenkins_node_path }}/node_secret.txt"
+    src: "{{ jenkins_node_path }}\\node_secret.txt"
     dest: /tmp/fetch-{{ inventory_hostname }}/
     flat: yes
 
@@ -80,8 +80,8 @@
   no_log: yes
 
 - name: copy agent script
-  template:
-    src: agent.cmd
+  win_template:
+    src: templates/agent.cmd
     dest: "{{ jenkins_node_path }}\\agent.cmd"
   register: result_copy_agent_script
 
@@ -116,11 +116,11 @@
   when: result_copy_agent_script.changed or result_download_agent_jar.changed or result_scheduled_task.changed
 
 - name: copy node verify script
-  copy:
-    src: verify_jenkins_node_jnlp.py
-    dest: "{{ jenkins_node_path }}/verify_jenkins_node_jnlp.py"
+  win_copy:
+    src: files/verify_jenkins_node_jnlp.py
+    dest: "{{ jenkins_node_path }}\\verify_jenkins_node_jnlp.py"
 
 - name: verify that the node is connected
-  win_shell: python {{ jenkins_node_path }}/verify_jenkins_node_jnlp.py "{{ jenkins_node_master_url }}" "{{ jenkins_node_master_user }}" "{{ jenkins_node_master_password }}" "{{ jenkins_node_name }}"
+  win_shell: python {{ jenkins_node_path }}\\verify_jenkins_node_jnlp.py "{{ jenkins_node_master_url }}" "{{ jenkins_node_master_user }}" "{{ jenkins_node_master_password }}" "{{ jenkins_node_name }}"
   # 2019-12-02: You have two options. Use 'no_log: yes' or use a Jenkins credential object so Jenkins masks the output. I have opted for Jenkins to mask the output
   # as this is a command that fails often, and I'm tired of having to run the command by hand and removing no_log so I can see the output.
