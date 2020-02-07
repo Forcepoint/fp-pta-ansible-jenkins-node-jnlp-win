@@ -12,11 +12,22 @@
   when: openjdk.changed
 # A reboot is immediately required if openjdk changed so JAVA_HOME is available.
 
-- name: install the cert in the java store
-  win_shell: "bin\\keytool -import -storepass changeit -noprompt -trustcacerts -alias CAInternalFDO -file C:\\Windows\\fdo_ca.pem -keystore lib\\security\\cacerts"
-  args:
-    executable: cmd
-    chdir: "%JAVA_HOME%"
+- name: apply the provided cert
+  block:
+    - name: check the java keystore for the cert
+      win_shell: "bin\\keytool -list -storepass changeit -alias {{ jenkins_node_master_ca_cert | basename }} -keystore lib\\security\\cacerts"
+        args:
+          executable: cmd
+          chdir: "%JAVA_HOME%"
+      ignore_errors: yes
+      register: check_java_keystore
+
+    - name: install the cert in the java store
+      win_shell: "bin\\keytool -import -storepass changeit -noprompt -trustcacerts -alias {{ jenkins_node_master_ca_cert | basename }} -file {{ jenkins_node_master_ca_cert }} -keystore lib\\security\\cacerts"
+      args:
+        executable: cmd
+        chdir: "%JAVA_HOME%"
+      when: check_java_keystore.rc != 0
   when: jenkins_node_master_ca_cert is defined
 
 - name: create folder for workspaces
