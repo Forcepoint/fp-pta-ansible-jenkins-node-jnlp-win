@@ -62,7 +62,7 @@ Again, make sure you get those passwords vaulted so they're not in plain text!
 
 ## License
 
-BSD
+BSD-3-Clause
 
 ## Author Information
 
