@@ -108,6 +108,9 @@
     logon_type: password
     run_level: highest
     run_only_if_network_available: yes
+    execution_time_limit: PT0S    # infinite
+    restart_interval: PT5M        # every 5 minutes
+    restart_count: 288            # interval * count = 1 day
     enabled: yes
   register: result_scheduled_task
 
