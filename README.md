@@ -41,6 +41,10 @@ Make sure you get those passwords vaulted so they're not in plain text!
   This defaults to the ansible host name.
 * jenkins_node_host: The DNS/IP address for the node. This defaults to the ansible host's default IPV4 address.
 * jenkins_node_master_ca_cert: The path to the CA certificate for verifying SSL connections with the master, if needed.
+* jenkins_node_openjdk_major_version: The major version of OpenJDK to install. This defaults to the same major version
+  that the jenkins master role uses.
+* jenkins_node_openjdk_full_version: The full version of OpenJDK to install. Defaults to "latest" but you can provide a
+  specific version if you like. EX: "11.0.6.1"
 
 ## Dependencies
 
