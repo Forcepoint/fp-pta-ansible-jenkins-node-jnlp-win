@@ -10,9 +10,9 @@
   register: openjdk
   when: jenkins_node_openjdk_full_version != "latest"
 
-- name: "install openjdk{{ jenkins_node_openjdk_major_version }} {{ jenkins_node_openjdk_full_version }}"
+- name: install openjdk{{ jenkins_node_openjdk_major_version }} latest
   win_chocolatey:
-    name: "openjdk{{ jenkins_node_openjdk_major_version }}"
+    name: openjdk{{ jenkins_node_openjdk_major_version }}
     state: latest
   register: openjdk
   when: jenkins_node_openjdk_full_version == "latest"
