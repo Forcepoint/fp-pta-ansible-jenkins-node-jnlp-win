@@ -102,6 +102,10 @@
       working_directory: "{{ jenkins_node_path }}"
     triggers:
     - type: boot
+    - type: daily
+      repetition:
+        interval: "P0Y0M0DT0H5M0S"
+      start_boundary: "2020-04-01T09:00:00"
     username: "{{ jenkins_node_user_name }}"
     password: "{{ jenkins_node_user_password }}"
     update_password: no
@@ -111,6 +115,7 @@
     execution_time_limit: PT0S    # infinite
     restart_interval: PT5M        # every 5 minutes
     restart_count: 288            # interval * count = 1 day
+    multiple_instances: 2     # will not start a new instance if another is running
     enabled: yes
   register: result_scheduled_task
 
