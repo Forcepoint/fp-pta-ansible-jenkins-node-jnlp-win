@@ -102,7 +102,7 @@
       working_directory: "{{ jenkins_node_path }}"
     triggers:
     - type: boot
-    - type: daily
+    - type: time
       repetition:
         interval: "P0Y0M0DT0H5M0S"
       start_boundary: "2020-04-01T09:00:00"
@@ -111,11 +111,15 @@
     update_password: no
     logon_type: password
     run_level: highest
-    run_only_if_network_available: yes
-    execution_time_limit: PT0S    # infinite
-    restart_interval: PT5M        # every 5 minutes
-    restart_count: 288            # interval * count = 1 day
-    multiple_instances: 2     # will not start a new instance if another is running
+    execution_time_limit: PT0S            # infinite
+    restart_interval: PT5M                # every 5 minutes
+    restart_count: 288                    # interval * count = 1 day
+    multiple_instances: 2                 # will not start a new instance if another is running
+    run_only_if_network_available: no     # run whether network is available or not.
+    disallow_start_if_on_batteries: no    # run whether on batteries or not.
+    stop_if_going_on_batteries: no        # keep running, don't stop.
+    wake_to_run: yes                      # get it going!
+    start_when_available: yes             # run ASAP
     enabled: yes
   register: result_scheduled_task
 
