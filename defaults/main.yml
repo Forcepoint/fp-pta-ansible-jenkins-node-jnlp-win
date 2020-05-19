@@ -7,3 +7,5 @@ jenkins_node_executors: 1
 jenkins_node_labels: "{{ inventory_hostname }}"
 jenkins_node_path: 'C:\Jenkins'
 jenkins_node_master_ca_cert: ""
+jenkins_node_openjdk_major_version: "11"
+jenkins_node_openjdk_full_version: "latest"

@@ -1,11 +1,21 @@
 ---
 # tasks file for win-jenkins-node-jnlp
 
-- name: install openjdk11
+- name: "install openjdk{{ jenkins_node_openjdk_major_version }} {{ jenkins_node_openjdk_full_version }}"
   win_chocolatey:
-    name: openjdk11
+    name: "openjdk{{ jenkins_node_openjdk_major_version }}"
+    state: present
+    version: "{{ jenkins_node_openjdk_full_version }}"
+    pinned: yes
+  register: openjdk
+  when: jenkins_node_openjdk_full_version != "latest"
+
+- name: install openjdk{{ jenkins_node_openjdk_major_version }} latest
+  win_chocolatey:
+    name: openjdk{{ jenkins_node_openjdk_major_version }}
     state: latest
   register: openjdk
+  when: jenkins_node_openjdk_full_version == "latest"
 
 - name: reboot
   # A reboot is immediately required if openjdk changed so JAVA_HOME is available.
