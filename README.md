@@ -1,4 +1,4 @@
-# win-jenkins-node-jnlp
+# jenkins-node-jnlp-win
 
 Setup the Windows host as a Jenkins JNLP node, add the node's configuration to the master, 
 configure the Windows user to start the connection to the master,
@@ -56,13 +56,13 @@ Again, make sure you get those passwords vaulted so they're not in plain text!
 
       hosts: jenkinsnode01
       vars:
-        jenkins_node_master_address: http://jenkins.COMPANY.com
+        jenkins_node_master_address: https://jenkins.COMPANY.com
         jenkins_node_master_user: admin
         jenkins_node_master_password: Password1
         jenkins_node_user_name: Administrator
         jenkins_node_user_password: Password2
       roles:
-        - role: win-jenkins-node-jnlp
+        - role: jenkins-node-jnlp-win
 
 ## License
 
