@@ -15,6 +15,8 @@ This type of connection is necessary though if the jobs on this Jenkins node req
 like UI testing or something else that interacts with the desktop.
 SSH connections do not provide use of the desktop unfortunately.
 
+For information about PTA and how to use it with this Ansible role please visit https://github.com/Forcepoint/fp-pta-overview/blob/master/README.md
+
 ## Requirements
 
 The Jenkins master already exists and basic setup is complete. 
