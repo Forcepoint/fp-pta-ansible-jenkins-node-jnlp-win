@@ -69,37 +69,20 @@
 - name: modify certifi if needed
   win_shell: python {{ jenkins_node_path }}\\modify_certifi.py "{{ jenkins_node_master_url }}" "{{ jenkins_node_master_ca_cert }}"
 
-- name: add the node config to the jenkins master
-  # To run this script, the user provided has to have Administrator rights in the Jenkins instance because it runs the Script Console.
-  # See https://support.cloudbees.com/hc/en-us/articles/222520647-How-to-find-slave-secret-key-
-  win_shell: python {{ jenkins_node_path }}/create_jenkins_node_jnlp.py "{{ jenkins_node_master_url }}" "{{ jenkins_node_master_user }}" "{{ jenkins_node_master_password }}" "{{ jenkins_node_name }}" "{{ jenkins_node_description }}" "{{ jenkins_node_labels }}" "{{ jenkins_node_path }}\\node_secret.txt" "--num-executors={{ jenkins_node_executors }}" "--path={{ jenkins_node_path }}" --verbose
-  # As of 2017-10-2, Ansible doesn't keep track what values were vaulted. Without no_log, an error would
-  # cause the command to be displayed, which is not desirable.
-  # 2019-12-02: You have two options. Use 'no_log: yes' or use a Jenkins credential object so Jenkins masks the output. I have opted for Jenkins to mask the output
-  # as this is a command that fails often, and I'm tired of having to run the command by hand and removing no_log so I can see the output.
-
-- name: fetch the node secret from the remote
-  fetch:
-    src: "{{ jenkins_node_path }}\\node_secret.txt"
-    dest: /tmp/fetch-{{ inventory_hostname }}/
-    flat: yes
-
-- name: get the node secret
-  set_fact:
-    jenkins_node_secret: "{{ lookup('file', '/tmp/fetch-{{ inventory_hostname }}/node_secret.txt').strip() }}"
-  no_log: yes
-
 - name: copy agent script
   win_template:
     src: templates/agent.cmd
     dest: "{{ jenkins_node_path }}\\agent.cmd"
-  register: result_copy_agent_script
+  # This will always show as changed since the agent.cmd file is modified by the create_jenkins_node_jnlp.py script.
 
-- name: remove the node secret from localhost
-  file:
-    state: absent
-    path: /tmp/fetch-{{ inventory_hostname }}/node_secret.txt
-  delegate_to: localhost
+- name: add the node config to the jenkins master
+  # To run this script, the user provided has to have Administrator rights in the Jenkins instance because it runs the Script Console.
+  # See https://support.cloudbees.com/hc/en-us/articles/222520647-How-to-find-slave-secret-key-
+  win_shell: python {{ jenkins_node_path }}/create_jenkins_node_jnlp.py "{{ jenkins_node_master_url }}" "{{ jenkins_node_master_user }}" "{{ jenkins_node_master_password }}" "{{ jenkins_node_name }}" "{{ jenkins_node_description }}" "{{ jenkins_node_labels }}" "{{ jenkins_node_path }}\\agent.cmd" "--num-executors={{ jenkins_node_executors }}" "--path={{ jenkins_node_path }}" --verbose
+  # As of 2017-10-2, Ansible doesn't keep track what values were vaulted. Without no_log, an error would
+  # cause the command to be displayed, which is not desirable.
+  # 2019-12-02: You have two options. Use 'no_log: yes' or use a Jenkins credential object so Jenkins masks the output. I have opted for Jenkins to mask the output
+  # as this is a command that fails often, and I'm tired of having to run the command by hand and removing no_log so I can see the output.
 
 - name: create a scheduled task to start the connection to the master
   # Create a Scheduled Task that runs on boot, which runs agent.cmd.
@@ -135,7 +118,7 @@
 
 # Restart if any of the above pertinent tasks changed.
 - win_reboot:
-  when: result_copy_agent_script.changed or result_download_agent_jar.changed or result_scheduled_task.changed
+  when: result_download_agent_jar.changed or result_scheduled_task.changed
 
 - name: copy node verify script
   win_copy:
