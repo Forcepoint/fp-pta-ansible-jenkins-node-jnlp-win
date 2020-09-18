@@ -132,9 +132,12 @@ if __name__ == "__main__":
     # Run a script to get the node's secret.
     # https://support.cloudbees.com/hc/en-us/articles/222520647-How-to-find-slave-secret-key-
     node_secret = server.run_script("for (aSlave in hudson.model.Hudson.instance.slaves) "
-                                   "{ if (aSlave.name == '" + args.name +
-                                   "') { println aSlave.getComputer().getJnlpMac() } }")
+                                    "{ if (aSlave.name == '" + args.name +
+                                    "') { println aSlave.getComputer().getJnlpMac() } }")
 
-    # Save the secret so ansible can access it. This lets ansible trigger a reset if the secret has changed.
-    with open(os.path.abspath(args.path_secret), "w") as file_node_secret:
-        file_node_secret.write(node_secret)
+    # Save the secret into the appropriate file.
+    with open(os.path.abspath(args.path_secret), "rt") as file_needs_node_secret:
+        data_needs_node_secret = file_needs_node_secret.read()
+    data_needs_node_secret = data_needs_node_secret.replace('JENKINS_NODE_SECRET', node_secret)
+    with open(os.path.abspath(args.path_secret), "wt") as file_needs_node_secret:
+        file_needs_node_secret.write(data_needs_node_secret)
