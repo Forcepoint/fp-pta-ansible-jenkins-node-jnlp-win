@@ -7,7 +7,7 @@
     state: present
     version: "{{ jenkins_node_openjdk_full_version }}"
     pinned: yes
-    force: yes
+    allow_multiple: yes
   register: openjdk
   when: jenkins_node_openjdk_full_version != "latest"
 
