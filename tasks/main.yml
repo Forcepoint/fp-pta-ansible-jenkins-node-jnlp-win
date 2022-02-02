@@ -115,11 +115,10 @@
     wake_to_run: yes                      # get it going!
     start_when_available: yes             # run ASAP
     enabled: yes
-  register: result_scheduled_task
 
-# Restart if any of the above pertinent tasks changed.
-- win_reboot:
-  when: result_download_agent_jar.changed or result_scheduled_task.changed
+- name: restart the scheduled task when a new agent is downloaded
+  ansible.builtin.include_tasks: restart_scheduled_task.yml
+  when: result_download_agent_jar.changed
 
 - name: copy node verify script
   win_copy:
