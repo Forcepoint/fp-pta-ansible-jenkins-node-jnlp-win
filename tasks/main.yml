@@ -118,6 +118,7 @@
 
 - name: restart the scheduled task when a new agent is downloaded
   block:
+    # TODO: Test this block.
     - name: stop the scheduled task
       ansible.windows.win_shell: schtasks /End /TN "Jenkins JNLP"
 
@@ -139,7 +140,7 @@
       until: jenkins_node_jnlp_win_task_stat_start.state is defined and jenkins_node_jnlp_win_task_stat_start.state.status == "Running"
       retries: 10
       delay: 5
-  when: result_download_agent_jar.changed
+  #when: result_download_agent_jar.changed
 
 - name: copy node verify script
   ansible.windows.win_copy:
