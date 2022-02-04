@@ -126,7 +126,7 @@
       community.windows.win_scheduled_task_stat:
         name: "Jenkins JNLP"
       register: jenkins_node_jnlp_win_task_stat_stop
-      until: jenkins_node_jnlp_win_task_stat_stop.state is defined and jenkins_node_jnlp_win_task_stat_stop.state.status == "Ready"
+      until: jenkins_node_jnlp_win_task_stat_stop.state is defined and jenkins_node_jnlp_win_task_stat_stop.state.status == "TASK_STATE_READY"
       retries: 10
       delay: 5
 
@@ -137,7 +137,7 @@
       community.windows.win_scheduled_task_stat:
         name: "Jenkins JNLP"
       register: jenkins_node_jnlp_win_task_stat_start
-      until: jenkins_node_jnlp_win_task_stat_start.state is defined and jenkins_node_jnlp_win_task_stat_start.state.status == "Running"
+      until: jenkins_node_jnlp_win_task_stat_start.state is defined and jenkins_node_jnlp_win_task_stat_start.state.status == "TASK_STATE_RUNNING"
       retries: 10
       delay: 5
   #when: result_download_agent_jar.changed
