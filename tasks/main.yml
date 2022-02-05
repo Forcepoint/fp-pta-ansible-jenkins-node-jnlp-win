@@ -128,23 +128,36 @@
       until: jenkins_node_jnlp_win_task_stat_stop.state is defined and jenkins_node_jnlp_win_task_stat_stop.state.status == "TASK_STATE_READY"
       retries: 10
       delay: 5
+  when: result_download_agent_jar.changed
 
-    - name: start the scheduled task
+- name: wait 5 seconds
+  ansible.builtin.wait_for:
+    timeout: 5
+  delegate_to: localhost
+
+- name: check the status of the task
+  community.windows.win_scheduled_task_stat:
+    name: "Jenkins JNLP"
+  register: jenkins_node_jnlp_win_task_status
+
+- name: start and wait 10 for the scheduled task
+  block:
+    - name: start the task
       ansible.windows.win_shell: schtasks /Run /TN "Jenkins JNLP"
 
-    - name: wait 10 seconds
+    - name: wait 5 seconds
       ansible.builtin.wait_for:
-        timeout: 10
+        timeout: 5
       delegate_to: localhost
+  when: jenkins_node_jnlp_win_task_status.state is defined and jenkins_node_jnlp_win_task_stat_start.state.status != "TASK_STATE_RUNNING"
 
-    - name: wait till the task has started
-      community.windows.win_scheduled_task_stat:
-        name: "Jenkins JNLP"
-      register: jenkins_node_jnlp_win_task_stat_start
-      until: jenkins_node_jnlp_win_task_stat_start.state is defined and jenkins_node_jnlp_win_task_stat_start.state.status == "TASK_STATE_RUNNING"
-      retries: 10
-      delay: 5
-  #when: result_download_agent_jar.changed
+- name: wait till the task has for sure started
+  community.windows.win_scheduled_task_stat:
+    name: "Jenkins JNLP"
+  register: jenkins_node_jnlp_win_task_stat_start
+  until: jenkins_node_jnlp_win_task_stat_start.state is defined and jenkins_node_jnlp_win_task_stat_start.state.status == "TASK_STATE_RUNNING"
+  retries: 10
+  delay: 5
 
 - name: copy node verify script
   ansible.windows.win_copy:
