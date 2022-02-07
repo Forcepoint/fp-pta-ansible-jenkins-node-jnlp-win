@@ -149,7 +149,7 @@
       ansible.builtin.wait_for:
         timeout: 5
       delegate_to: localhost
-  when: jenkins_node_jnlp_win_task_status.state is defined and jenkins_node_jnlp_win_task_stat_start.state.status != "TASK_STATE_RUNNING"
+  when: jenkins_node_jnlp_win_task_status.state is defined and jenkins_node_jnlp_win_task_status.state.status != "TASK_STATE_RUNNING"
 
 - name: wait till the task has for sure started
   community.windows.win_scheduled_task_stat:
