@@ -31,4 +31,5 @@ if __name__ == "__main__":
             with open(args.ca_cert, 'rb') as infile:
                 customca = infile.read()
             with open(cafile, 'ab') as outfile:
+                outfile.write('\n\n')
                 outfile.write(customca)
